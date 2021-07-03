@@ -6,9 +6,23 @@
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
-	<div id="container">
+	<?php
+		// set auto-filled form data
+		if (isset($_SESSION['formdata'])) {
+			$formFirstName = $_SESSION['formdata']['firstName'];
+			$formLastName = $_SESSION['formdata']['lastName'];
+			$formEmail = $_SESSION['formdata']['email'];
+			unset($_SESSION['formdata']);
+		} else {
+			$formFirstName = "";
+			$formLastName = "";
+			$formEmail = "";
+		}
+	?>
+	<div class="container">
 		<div class="errors">
-			<?php  // get error messages from session if they exist
+			<?php
+				// get error messages from session if they exist
 				if (isset($_SESSION['errors'])) {
 					foreach ($_SESSION['errors'] as $error) {
 						echo "<p class='errorMsg'>{$error}</p>";
@@ -18,26 +32,22 @@
 				if (isset($_SESSION['errtype'])) unset($_SESSION['errtype']);
 			?>
 		</div>
-		
-		<!-- user login form -->
-		<form id="logForm" action="process.php" method="post">
-			<h2>User Login</h2>
+		<form class="form" id="logForm" action="process.php" method="post">
+			<h2 class="form-header">Login</h2>
 			<input type="hidden" name="action" value="login">
-			<input type="text" name="email" placeholder="Email" autocomplete="off" autofocus>
-			<input type="password" name="password" placeholder="Password" autocomplete="off">
-			<input type="submit" value="Login">
+			<p>Email<input class="form-input" type="text" name="email" autocomplete="off" autofocus></p>
+			<p>Password<input class="form-input" type="password" name="password" autocomplete="off"></p>
+			<input class="form-submit" type="submit" value="Login">
 		</form>
-		
-		<!-- user registration form -->
-		<form id="regForm" action="process.php" method="post">
-			<h2>User Registration</h2>
+		<form class="form" id="regForm" action="process.php" method="post">
+			<h2 class="form-header">Register</h2>
 			<input type="hidden" name="action" value="register">
-			<input type="text" name="firstName" placeholder="First name" autocomplete="off">
-			<input type="text" name="lastName" placeholder="Last name" autocomplete="off">
-			<input type="text" name="email" placeholder="Email" autocomplete="off">
-			<input type="password" name="password" placeholder="Password" autocomplete="off">
-			<input type="password" name="confirmPassword" placeholder="Password confirm" autocomplete="off">
-			<input type="submit" value="Register">
+			<p>First name<input class="form-input" type="text" name="firstName" autocomplete="off" value="<?= $formFirstName ?>"></p>
+			<p>Last name<input class="form-input" type="text" name="lastName" autocomplete="off" value="<?= $formLastName ?>"></p>
+			<p>Email<input class="form-input" type="text" name="email" autocomplete="off" value="<?= $formEmail ?>"></p>
+			<p>Password<input class="form-input" type="password" name="password" autocomplete="off"></p>
+			<p>Password confirm<input class="form-input" type="password" name="confirmPassword" autocomplete="off"></p>
+			<input class="form-submit" type="submit" value="Register">
 		</form>
 	</div>
 </body>

@@ -1,42 +1,25 @@
 <?php
 	session_start();
-	
-	//define constants for db_host, db_user, db_pass, and db_database
+
 	define('DB_HOST', 'localhost');
 	define('DB_USER', 'root');
-	define('DB_PASS', '');
+	define('DB_PASS', 'root');
 	define('DB_DATABASE', 'logpage');
 	define('DB_USER_TABLE', 'users');
-	
+
 	define('LOGIN_PG', 'index.php');
 	define('SUCCESS_PG', 'success.php');
-	
-		/* DEFAULT DATABASE FIELDS:
-			id
-			first_name
-			last_name
-			email
-			password
-			created_at
-			updated_at
-		*/
-	
+
 	if (isset($_POST['action'])) {
-		// log user in
-		if ($_POST['action'] == "login") {
-			login_user($_POST);
-		}
-		// register user
-		if ($_POST['action'] == "register") {
-			register_user($_POST);
-		}
+		if ($_POST['action'] == "login") login_user($_POST);
+		if ($_POST['action'] == "register") register_user($_POST);
 	} else {
-		// malicious navigation to process.php or someone is trying to log off
+		// malicious navigation to process.php or logoff
 		session_destroy();
 		header('location: ' . LOGIN_PG);
 		die();
 	}
-	
+
 	function login_user($post) {
 		// validate email with password
 		if (validate($post['email'], $post['password'])) {
@@ -63,35 +46,25 @@
 			die();
 		}
 	}  /* end of login_user function */
-	
+
 	function register_user($post) {
 		$_SESSION['errors'] = array();
-		
-		// verify first name field is not blank
+
  		if (empty($_POST['firstName'])) $_SESSION['errors'][] = 'First name cannot be blank.';
-		// verify first name is valid
- 		if (has_numbers($_POST['firstName'])) $_SESSION['errors'][] = 'Invalid first name.';
-		
-		// verify last name field is not blank
 		if (empty($_POST['lastName'])) $_SESSION['errors'][] = 'Last name cannot be blank.';
-		// verify last name is valid
-		if (has_numbers($_POST['lastName'])) $_SESSION['errors'][] = 'Invalid last name.';
-		
-		// verify email is valid
-		if (!filter_var($_POST['email'],FILTER_VALIDATE_EMAIL)) $_SESSION['errors'][] = 'Invalid email entered.';
-		// verify email is not already taken
-		if (check_user_exists($_POST)) $_SESSION['errors'][] = 'User with email \'' . $_POST['email'] . '\' already exists.';
-		
-		// verify password field is not blank
 		if (empty($_POST['password'])) $_SESSION['errors'][] = 'Password cannot be blank.';
-		// verify password is at least 6 chars
-		if (strlen($_POST['password']) <= 6) $_SESSION['errors'][] = 'Password must be longer than 6 characters.';
-		
-		// verify password confirmation field in not blank
 		if (empty($_POST['confirmPassword'])) $_SESSION['errors'][] = 'Password confirmation cannot be blank.';
-		// verify password confirmation matches password
+ 		if (has_numbers($_POST['firstName'])) $_SESSION['errors'][] = 'Invalid first name.';
+		if (has_numbers($_POST['lastName'])) $_SESSION['errors'][] = 'Invalid last name.';
+		if (!filter_var($_POST['email'],FILTER_VALIDATE_EMAIL)) $_SESSION['errors'][] = 'Invalid email entered.';
+		if (check_user_exists($_POST)) $_SESSION['errors'][] = 'User with email \'' . $_POST['email'] . '\' already exists.';
+		if (strlen($_POST['password']) <= 6) $_SESSION['errors'][] = 'Password must be longer than 6 characters.';
 		if ($_POST['confirmPassword'] != $_POST['password']) $_SESSION['errors'][] = 'Passwords do not match.';
-		
+
+		$_SESSION['formdata']['firstName'] = $_POST['firstName'];
+		$_SESSION['formdata']['lastName'] = $_POST['lastName'];
+		$_SESSION['formdata']['email'] = $_POST['email'];
+
 		// check for errors
 		if (empty($_SESSION['errors'])) {
 			// no errors exist in user input data
@@ -123,7 +96,7 @@
 			die();
 		}
 	}  /* end of register_user function */
-	
+
 	// check if a user already exists in the database
 	function check_user_exists($post) {
 		$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_DATABASE);
@@ -134,10 +107,9 @@
 			$stmt->fetch();  // fetch the data
 			$stmt->close();  // close the prepared statement
 		}
-		
 		return $id;
 	}
-	
+
 	// check if a given string contains any numbers
 	function has_numbers($str) {
 		$hasNum = false;
@@ -149,7 +121,7 @@
 		}
 		return $hasNum;
 	}
-	
+
 	// encrypt password
 	function encrypt($pw_in) {
 		$hash = password_hash($pw_in, PASSWORD_DEFAULT);
